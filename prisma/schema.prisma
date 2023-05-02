@@ -24,11 +24,27 @@ model Campaign {
   id            String   @id @default(cuid())
   merchantId    String   @map("merchant_id")
   merchant      Merchant @relation(fields: [merchantId], references: [id])
+  name          String
   password      String?
   productIds    String?  @map("product_ids")
   collectionIds String?  @map("collection_ids")
+  mainImage     String?  @map("main_image")
+  themeId       String   @unique
+  theme         Theme    @relation(fields: [themeId], references: [id])
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("Campaigns")
+}
+
+model Theme {
+  id              String    @id @default(cuid())
+  campaign        Campaign?
+  primaryColor    String?
+  secondaryColor  String?
+  backgroundColor String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("Themes")
 }
