@@ -21,12 +21,14 @@ model Merchant {
 }
 
 model Campaign {
-  id         String   @id @default(cuid())
-  merchantId String   @map("merchant_id")
-  merchant   Merchant @relation(fields: [merchantId], references: [id])
-  password   String?
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  merchantId    String   @map("merchant_id")
+  merchant      Merchant @relation(fields: [merchantId], references: [id])
+  password      String?
+  productIds    String?  @map("product_ids")
+  collectionIds String?  @map("collection_ids")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("Campaigns")
 }
