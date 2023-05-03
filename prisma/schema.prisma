@@ -13,6 +13,7 @@ datasource db {
 model Merchant {
   id        String     @id @default(cuid())
   storeId   String     @unique @map("store_id")
+  secret    String?    @default(uuid())
   campaigns Campaign[]
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
