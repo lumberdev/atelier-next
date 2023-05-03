@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FormEventHandler } from 'react';
+import { FC, FormEventHandler, useEffect } from 'react';
 
-const PasswordForm = () => {
+const PasswordForm: FC<{ redirect?: string; merchant?: string }> = ({ redirect, merchant }) => {
   const router = useRouter();
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
@@ -15,14 +15,23 @@ const PasswordForm = () => {
 
     fetch('/password/submit', {
       method: 'POST',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ merchant, password }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (!data.authorized) return;
-        router.replace('/');
+        router.replace(redirect ? redirect : '/');
       });
   };
+
+  useEffect(() => {
+    if (!redirect) return;
+
+    const url = new URL(window.location.href);
+    url.search = '';
+
+    window.history.replaceState(null, '', url);
+  }, [redirect]);
 
   return (
     <form onSubmit={handleSubmit}>

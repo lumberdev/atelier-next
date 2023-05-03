@@ -1,21 +1,30 @@
 import { getAuthorizationToken } from '@lib/auth/getAuhtorizationToken';
 import { verifyAuthorizationToken } from '@lib/auth/verifyAuthorizationToken';
 import { credentials } from '@lib/data/credentials';
-import { redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 export const POST = async (request: Request) => {
-  const body = (await request.json()) as { password?: string };
+  const body = (await request.json()) as { password?: string; merchant?: string };
   const password = body.password ?? null;
+  const merchantIdentifier = body.merchant ?? null;
 
-  if (!password)
+  if (!password || !merchantIdentifier)
     return new NextResponse(JSON.stringify({ error: { message: 'Invalid request body.' } }), { status: 400 });
 
-  const token = getAuthorizationToken({ merchantSecret: credentials.goodehealth.secret, merchantPassword: password });
+  const merchant = await prisma?.merchant.findUnique({
+    where: { storeId: merchantIdentifier },
+    select: { secret: true, campaigns: { select: { password: true } } },
+  });
+  const [campaign] = merchant?.campaigns ?? [];
+
+  if (!merchant)
+    return new NextResponse(JSON.stringify({ error: { message: 'Invalid request body.' } }), { status: 400 });
+
+  const token = getAuthorizationToken({ merchantSecret: merchant.secret!, merchantPassword: password });
   const authorized = verifyAuthorizationToken({
     token,
-    merchantSecret: credentials.goodehealth.secret,
-    merchantPassword: credentials.goodehealth.password,
+    merchantSecret: merchant.secret!,
+    merchantPassword: campaign.password!,
   });
 
   if (!authorized)
