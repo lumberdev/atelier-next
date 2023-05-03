@@ -1,7 +1,7 @@
 import { getAuthorizationToken } from '@lib/auth/getAuhtorizationToken';
 import { verifyAuthorizationToken } from '@lib/auth/verifyAuthorizationToken';
-import { credentials } from '@lib/data/credentials';
 import { NextResponse } from 'next/server';
+import { prisma } from '@lib/prisma';
 
 export const POST = async (request: Request) => {
   const body = (await request.json()) as { password?: string; merchant?: string };
