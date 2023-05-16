@@ -15,11 +15,14 @@ export const POST = async (request: Request) => {
 
   const { shop, accessToken } = session;
 
+  const secret = new Crypto().randomUUID();
+
   const newMerchant = await prisma?.merchant.upsert({
     where: { shopId: shop },
     create: {
       shopId: shop,
       accessToken,
+      secret,
       isActive: true,
     },
     update: {
