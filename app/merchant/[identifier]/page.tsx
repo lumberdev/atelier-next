@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 const MerchantPage = async ({ params }: { params: { identifier: string } }) => {
   const merchant = await prisma.merchant.findUnique({
-    where: { storeId: params.identifier },
+    where: { shopId: params.identifier },
     include: { campaigns: { include: { theme: true } } },
   });
 

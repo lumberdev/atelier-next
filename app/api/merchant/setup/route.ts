@@ -20,7 +20,7 @@ export const POST = async (request: Request) => {
 
   const newMerchant = await prisma.merchant.create({
     data: {
-      storeId: identifier,
+      shopId: identifier,
       campaigns: { create: { name, password, theme: { create: { primaryColor: '#000' } } } },
     },
     include: {

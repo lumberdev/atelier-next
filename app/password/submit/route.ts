@@ -12,7 +12,7 @@ export const POST = async (request: Request) => {
     return new NextResponse(JSON.stringify({ error: { message: 'Invalid request body.' } }), { status: 400 });
 
   const merchant = await prisma?.merchant.findUnique({
-    where: { storeId: merchantIdentifier },
+    where: { shopId: merchantIdentifier },
     select: { secret: true, campaigns: { select: { password: true } } },
   });
   const [campaign] = merchant?.campaigns ?? [];
