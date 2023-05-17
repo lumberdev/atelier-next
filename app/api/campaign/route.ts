@@ -62,3 +62,44 @@ export const POST = async (request: Request) => {
 
   return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
 };
+
+export const PUT = async (request: Request) => {
+  const { products } = (await request.json()) as {
+    products: string;
+  };
+
+  const shopId = request.headers.get('X-Atelier-Merchant') as string;
+
+  if (!shopId)
+    return new NextResponse(JSON.stringify({ success: false, error: { message: 'Invalid request.' } }), {
+      status: 400,
+    });
+
+  const merchant = await prisma.merchant.findUnique({
+    where: { shopId },
+    include: {
+      campaigns: {
+        include: {
+          theme: true,
+        },
+      },
+    },
+  });
+
+  if (!merchant)
+    return new NextResponse(JSON.stringify({ success: false, error: { message: 'Unrecognized merchant' } }), {
+      status: 412,
+    });
+
+  // TODO: Update to handle multiple campaigns
+  const [campaign] = merchant.campaigns ?? [];
+
+  const updatedCampaign = await prisma.campaign.update({
+    where: { id: campaign.id },
+    data: {
+      productIds: products,
+    },
+  });
+
+  return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
+};
