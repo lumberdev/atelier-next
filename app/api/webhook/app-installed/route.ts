@@ -1,10 +1,14 @@
-import { cryption } from '@lib/cryption';
 import { NextResponse } from 'next/server';
+import { prisma } from '@lib/prisma';
+import { decrypt, encrypt, getRandomKey } from '@lib/utils/crypto';
 
 export const POST = async (request: Request) => {
-  const { payload } = (await request.json()) as { payload: string };
+  const {
+    session: { cipher, iv },
+  } = (await request.json()) as { session: { cipher: string; iv: string } };
 
-  const session = JSON.parse(cryption.decrypt(payload)) as {
+  const sessionPayload = await decrypt(cipher, iv, process.env.WEBHOOK_ENCRYPTION_KEY ?? '');
+  const session = JSON.parse(sessionPayload) as {
     id: string;
     shop: string;
     state: string;
@@ -15,13 +19,14 @@ export const POST = async (request: Request) => {
 
   const { shop, accessToken } = session;
 
-  const secret = new Crypto().randomUUID();
+  const secret = getRandomKey();
+  const token = await encrypt(accessToken, process.env.ATELIER_SECRET ?? '');
 
   const newMerchant = await prisma?.merchant.upsert({
     where: { shopId: shop },
     create: {
       shopId: shop,
-      accessToken,
+      accessToken: `${token.cipher},${token.iv}`,
       secret,
       isActive: true,
     },
